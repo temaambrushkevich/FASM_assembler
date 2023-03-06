@@ -7,19 +7,19 @@ entry start             ; Говорим windows в каком месте ста
                         
 ; секция данных с неинициализированными переменными(не содержат никаких значений)
 section '.data?' data readable writeable
-   year    dd ?
+   year    dd ?      ; dd - двойное слово
    ostatok dd ?
    
 ; Объявляются и определяются инициализируемые данные
 section '.data' data readable
-   msg1    db  'Enter year: ',0
+   msg1    db  'Enter year: ',0           ; db - байт
    msg2    db  "You entered: %d",10,0
 
 ; макрос(создание собственной инструкции), 
 ; препроцессор заменит встретившееся имя макроса на тело(между { и }) макроса
 ; Один аргумент - val
 macro is_leap_year val {
-   mov eax,[val]        ; Записываем в eax значение val
+   mov eax, [val]        ; Записываем в eax значение val
    
    mov ebx, 400         ; Записываем в ebx делитель
    mov edx, 0           ; Обнуляем регистр edx, в нем будет лежать остаток
@@ -48,30 +48,41 @@ macro is_leap_year val {
    jne its_false        ; Если все условия проверились и не было переходов по меткам => год не високосный
 }
 
+; Процедура для ввода года.
+; Принимает два аргумента: начальную фразу(приглашение) и фразу,
+; которая будет подтверждать то, что ввел пользователь.
+proc enter_year, msg1, msg2
+   cinvoke printf, [msg1], 0        ; Вывод приглашения к вводу
+   cinvoke scanf, '%d', year        ; ввод year
+   mov   eax, [year]                ; Помещаем в регистр eax значение year
+   cinvoke printf, [msg2], [year]   ; вывод введенного года
+   ret
+endp
 
 ; Секция, в которой происходят все действия
 section '.code' code readable executable
 
 start:
-   cinvoke printf, msg1, 0          ; Вывод приглашения к вводу
-   cinvoke scanf,   '%d', year      ; ввод year
-   mov   eax, [year]                ; Помещаем в регистр eax значение year
-   cinvoke printf, msg2, [year]     ; вывод введенного года
+   ; stdcall - вызов процедуры с соглашениями вызова stdcall
+   stdcall enter_year, msg1, msg2
+
    jmp .check_year                  ; безусловный переход к метке check_year
 
    .check_year:
-   is_leap_year year
+      is_leap_year year
 
       its_true:
          cinvoke printf, "%d is a leap year", [year], 0   
-         invoke  sleep, 50000       ; 50 sec. delay
-         invoke  exit, 0            ; выход из программы
-         ret
+         jmp exit_prog
       its_false:
          cinvoke printf, "%d it's NOT a leap year", [year], 0
-         invoke  sleep, 50000       ; 50 sec. delay
-         invoke  exit, 0            ; выход из программы
-ret
+         jmp exit_prog
+
+   ; выход из программы     
+   exit_prog:
+      invoke  sleep, 10000       ; 10 sec. delay
+      invoke  exit, 0            ; выход из программы
+      ret
 
 
 
