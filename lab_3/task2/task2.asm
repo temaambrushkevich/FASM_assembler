@@ -17,8 +17,8 @@ section '.msg' data readable
 
 section '.code' code readable executable
 
-; функция макрос для печати массива 
-; принимает три агрумета: arr, arr_size и word_size
+; С„СѓРЅРєС†РёСЏ РјР°РєСЂРѕСЃ РґР»СЏ РїРµС‡Р°С‚Рё РјР°СЃСЃРёРІР° 
+; РїСЂРёРЅРёРјР°РµС‚ С‚СЂРё Р°РіСЂСѓРјРµС‚Р°: arr, arr_size Рё word_size
 macro print_array arr, arr_size, word_size
 {
      mov ebx, 0
@@ -29,61 +29,61 @@ macro print_array arr, arr_size, word_size
        jne @b
 }
 
-; функция макрос для заполнения массива с клавиатуры
+; С„СѓРЅРєС†РёСЏ РјР°РєСЂРѕСЃ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РјР°СЃСЃРёРІР° СЃ РєР»Р°РІРёР°С‚СѓСЂС‹
 macro fill_array arr, size_arr, word_size
 {
     mov ebx, 0
     @@:
-      cinvoke scanf, ' %d', A   ; считываем введенное число в A
-      mov eax, dword [A]        ; помещаем A в eax
-      mov [arr+ebx], eax        ; записываем значение элемента в массив
+      cinvoke scanf, ' %d', A   ; СЃС‡РёС‚С‹РІР°РµРј РІРІРµРґРµРЅРЅРѕРµ С‡РёСЃР»Рѕ РІ A
+      mov eax, dword [A]        ; РїРѕРјРµС‰Р°РµРј A РІ eax
+      mov [arr+ebx], eax        ; Р·Р°РїРёСЃС‹РІР°РµРј Р·РЅР°С‡РµРЅРёРµ СЌР»РµРјРµРЅС‚Р° РІ РјР°СЃСЃРёРІ
       add ebx, word_size
       cmp ebx, size_arr
       jne @b
 }
 
-; сортировка пузырьком по возрастанию
+; СЃРѕСЂС‚РёСЂРѕРІРєР° РїСѓР·С‹СЂСЊРєРѕРј РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ
 macro sort_array arr, len_arr
 {
-    mov edi, arr   ; передаем в edi указатель на массив
-    mov ecx, len_arr     ; передаем в ecx длину массива
+    mov edi, arr   ; РїРµСЂРµРґР°РµРј РІ edi СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РјР°СЃСЃРёРІ
+    mov ecx, len_arr     ; РїРµСЂРµРґР°РµРј РІ ecx РґР»РёРЅСѓ РјР°СЃСЃРёРІР°
      
     sort:       
-        lea ebx, [edi+ecx*4]    ; вычисляем текущий адрес второго операнда и помещаем его в ebx
+        lea ebx, [edi+ecx*4]    ; РІС‹С‡РёСЃР»СЏРµРј С‚РµРєСѓС‰РёР№ Р°РґСЂРµСЃ РІС‚РѕСЂРѕРіРѕ РѕРїРµСЂР°РЅРґР° Рё РїРѕРјРµС‰Р°РµРј РµРіРѕ РІ ebx
         mov eax, [edi]
     .cmploop:
         sub ebx, 4
         cmp eax, [ebx]
         jle .again
-        xchg eax, [ebx]   ; xchg - меняет операнды местами
+        xchg eax, [ebx]   ; xchg - РјРµРЅСЏРµС‚ РѕРїРµСЂР°РЅРґС‹ РјРµСЃС‚Р°РјРё
     .again:
         cmp ebx, edi
         jnz .cmploop
-        stosd             ; сохраняет eax по адресу ES:(E)DI; d - double word
+        stosd             ; СЃРѕС…СЂР°РЅСЏРµС‚ eax РїРѕ Р°РґСЂРµСЃСѓ ES:(E)DI; d - double word
         loop sort
 }
 
 start:
-     cinvoke printf,  msg_s, 'Enter six numbers via Enter, to fill the array: ', 0   ; Выводим приглашение к вводу
+     cinvoke printf,  msg_s, 'Enter six numbers via Enter, to fill the array: ', 0   ; Р’С‹РІРѕРґРёРј РїСЂРёРіР»Р°С€РµРЅРёРµ Рє РІРІРѕРґСѓ
 
-     ; вызываем макрос для заполнения массива
+     ; РІС‹Р·С‹РІР°РµРј РјР°РєСЂРѕСЃ РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ РјР°СЃСЃРёРІР°
      fill_array arr, size_arr, 4
 
-     ; вывод того, что ввел пользователь
+     ; РІС‹РІРѕРґ С‚РѕРіРѕ, С‡С‚Рѕ РІРІРµР» РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
      cinvoke printf,  msg_s, 'You entered: ', 0
      print_array arr, size_arr, 4
 
      cinvoke printf,  msg_s, '', 0 
 
-     ; вызываем сортировку
+     ; РІС‹Р·С‹РІР°РµРј СЃРѕСЂС‚РёСЂРѕРІРєСѓ
      sort_array arr, len_arr 
 
-     ; печатаем массив после сортировки
+     ; РїРµС‡Р°С‚Р°РµРј РјР°СЃСЃРёРІ РїРѕСЃР»Рµ СЃРѕСЂС‚РёСЂРѕРІРєРё
      cinvoke printf,  msg_s, 'Array after sorting: ', 0
      print_array arr, size_arr, 4
 
 
-     ; пауза и далее выход
+     ; РїР°СѓР·Р° Рё РґР°Р»РµРµ РІС‹С…РѕРґ
      invoke  sleep, 50000     ; 5 sec. delay
      invoke  exit, 0
      ret
